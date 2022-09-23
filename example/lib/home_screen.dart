@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:example/my_place.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_widget_cluster_markers.dart';
@@ -36,26 +38,35 @@ class _HomeScreenState extends State<HomeScreen> {
             name: 'Covent Garden',
             latLng: const LatLng(51.51170, -0.12400),
           ),
+          MyPlace(
+            name: 'Imperial College',
+            latLng: const LatLng(51.4988, -0.1749),
+          ),
         ],
         defaultPlaceMarker: Container(
           color: Colors.orange,
-          height: 50,
-          width: 50,
+          height: 100,
+          width: 100,
           child: const Icon(Icons.circle),
         ),
         defaultClusterMarker: Container(
           color: Colors.orange,
-          height: 50,
-          width: 50,
+          height: 100,
+          width: 100,
           child: const Icon(Icons.hexagon),
         ),
         clusterMarker: Container(
           color: Colors.orange,
-          height: 50,
-          width: 50,
+          height: 100,
+          width: 100,
           child: const Icon(Icons.square),
         ),
-        placeMarkerBuilder: (latLngId) => const Icon(Icons.shield),
+        placeMarkerBuilder: (latLngId) => Container(
+          color: Colors.orange,
+          height: 100,
+          width: 100,
+          child: Text('$latLngId\n${Random().nextInt(9)}'),
+        ),
       )),
     );
   }

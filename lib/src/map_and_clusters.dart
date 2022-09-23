@@ -118,7 +118,7 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
           },
           //! Marker Icon/Bitmap
           icon: (() {
-            if (!initMapBuildState.defaultBitmapsInitialised) {
+            if (!mapState.defaultBitmapsInitialised) {
               throw StateError(
                   '_markerBuilderCallback called when mapState.defaultClusterMarkerBitmap or mapState.defaultPlaceMarkerBitmap are still null');
             }
@@ -127,21 +127,22 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
                 logger.v(
                     '''initMapTripleBuildCycle: inFirstBuild: GoogleMap not rendered yet, so no Clusters in ClusterManager, using defaultMarkerBitmaps (trivial)''');
                 if (cluster.isMultiple) {
-                  return initMapBuildState.defaultClusterMarkerBitmap!;
+                  return mapState.defaultClusterMarkerBitmap!;
                 } else {
-                  return initMapBuildState.defaultPlaceMarkerBitmap!;
+                  return mapState.defaultPlaceMarkerBitmap!;
                 }
               } else if (initMapBuildState.inSecondBuild) {
                 logger.v(
                     '''initMapTripleBuildCycle: inSecondBuild: Clusters just initialised in ClusterManager, using defaultMarkerBitmaps.''');
                 if (cluster.isMultiple) {
-                  return initMapBuildState.defaultClusterMarkerBitmap!;
+                  return mapState.defaultClusterMarkerBitmap!;
                 } else {
-                  return initMapBuildState.defaultPlaceMarkerBitmap!;
+                  return mapState.defaultPlaceMarkerBitmap!;
                 }
               } else if (initMapBuildState.inThirdBuild) {
                 logger.v('''initMapTripleBuildCycle: inThirdBuild: ''');
-                return mapState.getBitmapFromClusterManagerId(cluster.getId());
+                return mapState.getBitmapFromClusterManagerId(
+                    context, cluster.getId());
               } else {
                 throw UnimplementedError(
                     '''Unimplemented Case: _markerBuilderCallback called when
@@ -152,14 +153,16 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
             } else if (refreshMapBuildState.refreshMapDoubleBuildCycle) {
               if (refreshMapBuildState.inFirstBuild) {
                 logger.v(
-                    '''refreshMapBuildState: inFirstBuild: Clusters not initialised in ClusterManager,
+                    '''refreshMapBuildState: inFirstBuild: New clusters in view not initialised in ClusterManager,
         Using markers from previous double build cycle.''');
-                return mapState.getBitmapFromClusterManagerId(cluster.getId());
+                return mapState.getBitmapFromClusterManagerId(
+                    context, cluster.getId());
               } else if (refreshMapBuildState.inSecondBuild) {
                 logger.v(
                     '''refreshMapBuildState: inSecondBuild: Clusters just refreshed in ClusterManager, 
         replacing markers from previous double build cycle with current ones in cache.''');
-                return mapState.getBitmapFromClusterManagerId(cluster.getId());
+                return mapState.getBitmapFromClusterManagerId(
+                    context, cluster.getId());
               } else {
                 throw UnimplementedError(
                     '''Unimplemented Case: _markerBuilderCallback called when

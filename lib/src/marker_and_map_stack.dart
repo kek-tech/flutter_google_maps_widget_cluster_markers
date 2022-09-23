@@ -49,9 +49,9 @@ class MarkerAndMapStack extends StatelessWidget {
           alignment: Alignment.topLeft,
           child: DefaultRepaintBoundaryGenerator(
             defaultPlaceRepaintBoundaryKey:
-                initMapBuildState.defaultPlaceRepaintBoundaryKey,
+                mapState.defaultPlaceRepaintBoundaryKey,
             defaultClusterRepaintBoundaryKey:
-                initMapBuildState.defaultClusterRepaintBoundaryKey,
+                mapState.defaultClusterRepaintBoundaryKey,
             defaultPlaceMarker: defaultPlaceMarker,
             defaultClusterMarker: defaultClusterMarker,
           ),
@@ -115,7 +115,7 @@ class MarkerAndMapStack extends StatelessWidget {
 
         //! Google Map
         /// Only builds after the Default Marker Bitmaps are initialised
-        Selector<InitMapBuildState, bool>(
+        Selector<MapState, bool>(
           selector: (p0, p1) => p1.defaultBitmapsInitialised,
           builder: (context, defaultBitmapsInitialised, child) {
             if (defaultBitmapsInitialised) {

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dev_utils/flutter_dev_utils.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/classes/cached_places_clusters.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/boundary_key_to_bitmap.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/utils/cluster_manager_id_utils.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,7 +30,41 @@ class MapState extends ChangeNotifier {
   final DebugBuildStage debugBuildStage;
   final double devicePixelRatio;
 
-  //! Generated Markers (Second Build)
+  //! Default Markers
+  /// Keys to use when generating and finding RepaintBoundary for default place marker
+  GlobalKey defaultPlaceRepaintBoundaryKey =
+      GlobalKey(debugLabel: 'defaultPlaceRepaintBoundaryKey');
+
+  /// Keys to use when generating and finding RepaintBoundary for default cluster markers
+  GlobalKey defaultClusterRepaintBoundaryKey =
+      GlobalKey(debugLabel: 'defaultClusterRepaintBoundaryKey');
+
+  /// This will be marked as initialised once bitmaps for the default markers are generated
+  bool get defaultBitmapsInitialised =>
+      defaultPlaceMarkerBitmap != null && defaultClusterMarkerBitmap != null;
+
+  BitmapDescriptor? defaultPlaceMarkerBitmap;
+  BitmapDescriptor? defaultClusterMarkerBitmap;
+
+  /// Converts the default markers to bitmaps
+  ///
+  /// Should only be called once after first layout of default markers
+  Future<void> initDefaultBitmaps(BuildContext context) async {
+    logger.v('initDefaultBitmaps: running');
+    await asyncTryCatchHandler(
+      tryFunction: () async {
+        final devicePixelRatio = Injector.map(context).devicePixelRatio;
+        // convert to bitmap
+        defaultPlaceMarkerBitmap = await boundaryKeyToBitmap(
+            defaultPlaceRepaintBoundaryKey, devicePixelRatio);
+        defaultClusterMarkerBitmap = await boundaryKeyToBitmap(
+            defaultClusterRepaintBoundaryKey, devicePixelRatio);
+        notifyListeners(); // defaultBitmapsInitialised => true
+      },
+    );
+  }
+
+  //! Generated Markers
   List<CachedCluster> _cachedClusters = [];
   List<CachedCluster> get cachedClusters => _cachedClusters;
 
@@ -105,7 +143,8 @@ class MapState extends ChangeNotifier {
   /// Returns bitmap for a CachedCluster or CachedPlace.
   ///
   /// Should only be called after convertCachedRenderKeysToBitmaps is done
-  BitmapDescriptor getBitmapFromClusterManagerId(String clusterManagerId) {
+  BitmapDescriptor getBitmapFromClusterManagerId(
+      BuildContext context, String clusterManagerId) {
     if (_cachedClusters.isEmpty && _cachedPlaces.isEmpty) {
       throw StateError(
           'getBitmapFromClusterManagerId called when _cachedClusters and _cachedPlaces are both empty');
@@ -133,6 +172,26 @@ class MapState extends ChangeNotifier {
         } else {
           return element.bitmap!;
         }
+      }
+    }
+
+    /// At this stage, no matching clusterManagerId was found in _cachedClusters or _cachedPlaces.
+    /// If this method is called from RefreshMapDoubleBuildCycle.firstBuild,
+    /// then it might be because there is a new Place in the map view which was not present in the previous build cycle.
+    /// In this case, return default cluster or place marker
+    RefreshMapBuildState refreshMapBuildState =
+        Injector.refreshMapBuild(context);
+    if (refreshMapBuildState.refreshMapDoubleBuildCycle &&
+        refreshMapBuildState.inFirstBuild) {
+      if (!defaultBitmapsInitialised) {
+        throw StateError(
+            'Tried to return defaultBitmap when it is not initialised yet');
+      }
+      // check to see if the clusterManagerId is for a place or cluster
+      if (ClusterManagerIdUtils.isCluster(clusterManagerId)) {
+        return defaultClusterMarkerBitmap!;
+      } else {
+        return defaultPlaceMarkerBitmap!;
       }
     }
 

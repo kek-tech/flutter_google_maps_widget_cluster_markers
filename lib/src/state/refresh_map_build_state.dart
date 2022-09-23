@@ -16,6 +16,7 @@ class RefreshMapBuildState extends ChangeNotifier {
 
   /// Master function to start refreshMapDoubleBuildCycle
   void startFirstBuild(BuildContext context) {
+    logger.w('==========REFRESH MAP DOUBLE BUILD START==========');
     logger.w('==========startFirstBuild==========');
 
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
@@ -60,5 +61,6 @@ class RefreshMapBuildState extends ChangeNotifier {
     refreshMapDoubleBuildCycle = false;
     inSecondBuild = false;
     allowRefreshMapDoubleBuildCycle = true;
+    logger.w('==========REFRESH MAP DOUBLE BUILD END==========');
   }
 }

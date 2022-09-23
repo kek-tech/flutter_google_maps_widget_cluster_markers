@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dev_utils/flutter_dev_utils.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
-import 'package:flutter_google_maps_widget_cluster_markers/src/utils/boundary_key_to_bitmap.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class InitMapBuildState extends ChangeNotifier {
   //! Build Members
@@ -26,6 +23,7 @@ class InitMapBuildState extends ChangeNotifier {
   bool inThirdBuild = false;
 
   void startFirstBuild() {
+    logger.w('==========INIT MAP TRIPLE BUILD START==========');
     logger.w('==========startFirstBuild==========');
     if (!allowInitMapTripleBuildCycle) {
       throw StateError(
@@ -88,39 +86,6 @@ class InitMapBuildState extends ChangeNotifier {
     initMapTripleBuildCycle = false;
     inThirdBuild = false;
     allowInitMapTripleBuildCycle = false;
-  }
-
-  //! Default Markers
-  /// Keys to use when generating and finding RepaintBoundary for default place marker
-  GlobalKey defaultPlaceRepaintBoundaryKey =
-      GlobalKey(debugLabel: 'defaultPlaceRepaintBoundaryKey');
-
-  /// Keys to use when generating and finding RepaintBoundary for default cluster markers
-  GlobalKey defaultClusterRepaintBoundaryKey =
-      GlobalKey(debugLabel: 'defaultClusterRepaintBoundaryKey');
-
-  /// This will be marked as initialised once bitmaps for the default markers are generated
-  bool get defaultBitmapsInitialised =>
-      defaultPlaceMarkerBitmap != null && defaultClusterMarkerBitmap != null;
-
-  BitmapDescriptor? defaultPlaceMarkerBitmap;
-  BitmapDescriptor? defaultClusterMarkerBitmap;
-
-  /// Converts the default markers to bitmaps
-  ///
-  /// Should only be called once after first layout of default markers
-  Future<void> initDefaultBitmaps(BuildContext context) async {
-    logger.v('initDefaultBitmaps: running');
-    await asyncTryCatchHandler(
-      tryFunction: () async {
-        final devicePixelRatio = Injector.map(context).devicePixelRatio;
-        // convert to bitmap
-        defaultPlaceMarkerBitmap = await boundaryKeyToBitmap(
-            defaultPlaceRepaintBoundaryKey, devicePixelRatio);
-        defaultClusterMarkerBitmap = await boundaryKeyToBitmap(
-            defaultClusterRepaintBoundaryKey, devicePixelRatio);
-        notifyListeners(); // defaultBitmapsInitialised => true
-      },
-    );
+    logger.w('==========INIT MAP TRIPLE BUILD END==========');
   }
 }

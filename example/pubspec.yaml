@@ -34,7 +34,8 @@ dependencies:
   flutter_google_maps_widget_cluster_markers:
     git:
       url: https://github.com/Kek-Tech/flutter_google_maps_widget_cluster_markers.git
-      ref: main 
+      ref: dev
+      # ref: main 
   google_maps_flutter: ^2.1.1
   google_maps_cluster_manager: ^3.0.0+1
 
