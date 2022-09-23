@@ -28,7 +28,7 @@ class _DefaultRepaintBoundaryGeneratorState
   @override
   void afterFirstLayout(BuildContext context) {
     logger.v('afterFirstLayout');
-    Injector.initMapBuild(context).initDefaultBitmaps(context);
+    Injector.map(context).initDefaultBitmaps(context);
   }
 
   @override
