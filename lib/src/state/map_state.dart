@@ -24,11 +24,13 @@ class MapState extends ChangeNotifier {
     required this.devicePixelRatio,
     required this.initialCameraPosition,
     required this.debugBuildStage,
+    required this.clusterMarkerTextStyle,
   });
   //! Misc
   final bool debugMode;
   final DebugBuildStage debugBuildStage;
   final double devicePixelRatio;
+  final TextStyle? clusterMarkerTextStyle;
 
   //! Default Markers
   /// Keys to use when generating and finding RepaintBoundary for default place marker

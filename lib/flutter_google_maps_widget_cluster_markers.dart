@@ -1,13 +1,16 @@
 library flutter_google_maps_widget_cluster_markers;
 
 export 'src/classes/place.dart';
+export '';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/marker_and_map_stack.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 /// This widget implements a very specific adaptation of google_maps_cluster_manager.
@@ -89,6 +92,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
     required this.defaultClusterMarker,
     required this.clusterMarker,
     required this.placeMarkerBuilder,
+    this.showLogs = false,
+    this.clusterMarkerTextStyle,
     this.debugMode = false,
     this.devicePixelRatio = 1,
     this.initialCameraPosition = const CameraPosition(
@@ -112,8 +117,23 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
   final CameraPosition initialCameraPosition;
   final DebugBuildStage debugBuildStage;
 
+  final TextStyle? clusterMarkerTextStyle;
+  final bool showLogs;
+
   @override
   Widget build(BuildContext context) {
+    logger = CallerLogger(
+      ignoreCallers: {
+        'syncTryCatchHandler',
+        'asyncTryCatchHandler',
+      },
+      filter: TypeFilter(
+        ignoreTypes: {},
+        ignoreLevel: Level.warning,
+      ),
+      level: showLogs ? Level.verbose : Level.warning,
+    );
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -122,9 +142,11 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
             devicePixelRatio: devicePixelRatio,
             initialCameraPosition: initialCameraPosition,
             debugBuildStage: debugBuildStage,
+            clusterMarkerTextStyle: clusterMarkerTextStyle,
           ),
         ),
         ChangeNotifierProvider(create: (context) => InitMapBuildState()),
+        ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
         ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
       ],
       child: MarkerAndMapStack(

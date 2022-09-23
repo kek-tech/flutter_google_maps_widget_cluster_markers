@@ -25,6 +25,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: GoogleMapWidgetClusterMarkers(
         key: GlobalKey(),
         debugMode: true,
+        clusterMarkerTextStyle: const TextStyle(
+          fontSize: 100,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
         places: [
           MyPlace(
             name: 'Tottenham Court Road',
@@ -47,25 +52,35 @@ class _HomeScreenState extends State<HomeScreen> {
           color: Colors.orange,
           height: 100,
           width: 100,
-          child: const Icon(Icons.circle),
+          child: const Icon(
+            Icons.circle,
+            size: 150,
+          ),
         ),
-        defaultClusterMarker: Container(
-          color: Colors.orange,
-          height: 100,
-          width: 100,
-          child: const Icon(Icons.hexagon),
+        defaultClusterMarker: const Icon(
+          Icons.hexagon,
+          size: 150,
         ),
-        clusterMarker: Container(
-          color: Colors.orange,
-          height: 100,
-          width: 100,
-          child: const Icon(Icons.square),
+        clusterMarker: const Icon(
+          Icons.hexagon,
+          size: 150,
         ),
-        placeMarkerBuilder: (latLngId) => Container(
-          color: Colors.orange,
-          height: 100,
-          width: 100,
-          child: Text('$latLngId\n${Random().nextInt(9)}'),
+        placeMarkerBuilder: (latLngId) => Stack(
+          alignment: Alignment.center,
+          children: [
+            const Icon(
+              Icons.circle,
+              size: 150,
+            ),
+            Text(
+              '${Random().nextInt(9)}',
+              style: const TextStyle(
+                fontSize: 80,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue,
+              ),
+            ),
+          ],
         ),
       )),
     );

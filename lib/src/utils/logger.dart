@@ -1,13 +1,5 @@
 import 'package:logger/logger.dart';
 
-var logger = CallerLogger(
-  ignoreCallers: {
-    'syncTryCatchHandler',
-    'asyncTryCatchHandler',
-  },
-  filter: TypeFilter(
-    ignoreTypes: {},
-    ignoreLevel: Level.warning,
-  ),
-  level: Level.verbose,
-);
+/// Logger for flutter_google_maps_widget_cluster_markers package which is
+/// initialised when instantiating GoogleMapWidgetClusterMarkers
+late Logger logger;

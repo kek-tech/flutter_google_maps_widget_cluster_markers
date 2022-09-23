@@ -75,8 +75,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: main
-      resolved-ref: "144155aa972a38ea8b6c0429a7c968ea7f7b65c2"
+      ref: dev
+      resolved-ref: "95e006c876374ea53231c2b02e97c9ae26a002b7"
       url: "https://github.com/Kek-Tech/flutter_google_maps_widget_cluster_markers.git"
     source: git
     version: "0.0.1"
@@ -191,7 +191,7 @@ packages:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.3"
   provider:
     dependency: transitive
     description:

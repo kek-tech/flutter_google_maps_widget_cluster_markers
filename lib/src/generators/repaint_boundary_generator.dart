@@ -42,7 +42,10 @@ class _RepaintBoundaryGeneratorState extends State<RepaintBoundaryGenerator>
               alignment: Alignment.center,
               children: [
                 widget.clusterMarker,
-                Text('${element.clusterSize}'),
+                Text(
+                  '${element.clusterSize}',
+                  style: mapState.clusterMarkerTextStyle,
+                ),
               ],
             )),
       );
