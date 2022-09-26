@@ -4,6 +4,13 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.da
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 
 class InitMapBuildState extends ChangeNotifier {
+  InitMapBuildState({
+    required this.afterInitMapCallback,
+  });
+  //! Callback
+  /// Callback which is invoked after the initMapTripleBuildCycle is completed
+  ///
+  final Future<void> Function()? afterInitMapCallback;
   //! Build Members
   /// Double build cycle flag used when the Google Map is created for the first time
   ///
@@ -87,5 +94,9 @@ class InitMapBuildState extends ChangeNotifier {
     inThirdBuild = false;
     allowInitMapTripleBuildCycle = false;
     logger.w('==========INIT MAP TRIPLE BUILD END==========');
+    if (afterInitMapCallback != null) {
+      logger.w('Invoking afterInitMapCallback');
+      afterInitMapCallback!.call();
+    }
   }
 }

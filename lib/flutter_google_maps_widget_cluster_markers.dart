@@ -109,6 +109,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
     ),
     this.debugBuildStage = DebugBuildStage.refreshMapSecondBuild,
     this.controller,
+    this.afterInitMapCallback,
     super.key,
   });
   final List<Place> places;
@@ -133,6 +134,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
   final bool showLogs;
 
   final GoogleMapWidgetClusterMarkersController? controller;
+
+  final Future<void> Function()? afterInitMapCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +163,10 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
             clusterTextPadding: clusterTextPadding,
           ),
         ),
-        ChangeNotifierProvider(create: (context) => InitMapBuildState()),
+        ChangeNotifierProvider(
+            create: (context) => InitMapBuildState(
+                  afterInitMapCallback: afterInitMapCallback,
+                )),
         ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
         ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
         if (controller != null)
