@@ -1,8 +1,9 @@
 library flutter_google_maps_widget_cluster_markers;
 
+export 'src/classes/controller.dart';
 export 'src/classes/place.dart';
-export '';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/classes/controller.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/marker_and_map_stack.dart';
@@ -80,6 +81,9 @@ import 'package:provider/provider.dart';
 /// the newly generated bitmaps
 ///
 /// - A refreshMapDoubleBuildCycle, which occurs whenever the GoogleMap is refreshed
+/// FIRST BUILD
+///
+/// SECOND BUILD
 ///
 /// Note:
 /// * clusterManagerId == ClusterManager.cluster.getId(), has format lat_lng_clusterSize
@@ -104,6 +108,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
       zoom: 14,
     ),
     this.debugBuildStage = DebugBuildStage.refreshMapSecondBuild,
+    this.controller,
     super.key,
   });
   final List<Place> places;
@@ -126,6 +131,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
   final EdgeInsets clusterTextPadding;
 
   final bool showLogs;
+
+  final GoogleMapWidgetClusterMarkersController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +163,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => InitMapBuildState()),
         ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
         ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
+        if (controller != null)
+          ChangeNotifierProvider(create: (context) => controller),
       ],
       child: MarkerAndMapStack(
         places: places,
@@ -165,6 +174,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
         placeMarkerBuilder: placeMarkerBuilder,
         placeMarkerOnTap: placeMarkerOnTap,
         clusterMarkerOnTap: clusterMarkerOnTap,
+        controller: controller,
       ),
     );
   }

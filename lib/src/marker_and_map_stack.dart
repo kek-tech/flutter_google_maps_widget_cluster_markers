@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_widget_cluster_markers.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/generators/default_repaint_boundary_generator.dart.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/generators/repaint_boundary_generator.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/map_and_clusters.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
-import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
@@ -19,10 +19,12 @@ class MarkerAndMapStack extends StatelessWidget {
     required this.clusterMarkerOnTap,
     required this.clusterMarker,
     required this.placeMarkerBuilder,
+    required this.controller,
     super.key,
   });
+
   final List<Place> places;
-  // final Future<Marker> Function(Cluster<Place>)? markerBuilder;
+
   final Widget defaultPlaceMarker;
   final Widget defaultClusterMarker;
 
@@ -32,12 +34,19 @@ class MarkerAndMapStack extends StatelessWidget {
   final Future<void> Function(String latLngId)? placeMarkerOnTap;
   final Future<void> Function(String latLngId)? clusterMarkerOnTap;
 
+  final GoogleMapWidgetClusterMarkersController? controller;
+
   @override
   Widget build(BuildContext context) {
     MapState mapState = Injector.map(context);
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+
+    if (controller != null) {
+      // Init controller if not null
+      controller!.init(context, mapState, refreshMapBuildState);
+    }
 
     if (initMapBuildState.allowInitMapTripleBuildCycle) {
       initMapBuildState.startFirstBuild();
