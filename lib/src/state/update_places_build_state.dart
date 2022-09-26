@@ -24,10 +24,11 @@ class UpdatePlacesBuildState extends ChangeNotifier {
     logger.w('==========UPDATE MARKERS DOUBLE BUILD START==========');
     logger.w('==========startFirstBuild==========');
     if (!allowUpdatePlacesDoubleBuildCycle) {
-      throw StateError('updatePlacesDoubleBuildCycle is not allowed.');
+      throw StateError(
+          'Tried to call updatePlacesDoubleBuildCycle.startFirstBuild() when allowUpdatePlacesDoubleBuildCycle is false.');
     } else {
       updatePlacesDoubleBuildCycle = true;
-
+      Injector.refreshMapBuild(context).allowRefreshMapDoubleBuildCycle = false;
       if (inFirstBuild) {
         throw StateError(
             'Tried to call startFirstBuild() when inFirstBuild is already true');
@@ -61,9 +62,11 @@ class UpdatePlacesBuildState extends ChangeNotifier {
     }
   }
 
-  void endSecondBuild() {
+  void endSecondBuild(BuildContext context) {
     updatePlacesDoubleBuildCycle = false;
     inSecondBuild = false;
+    Injector.refreshMapBuild(context).allowRefreshMapDoubleBuildCycle = true;
+
     logger.w('==========UPDATE MARKERS DOUBLE BUILD END==========');
   }
 }

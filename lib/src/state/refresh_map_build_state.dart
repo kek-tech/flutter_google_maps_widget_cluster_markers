@@ -23,8 +23,13 @@ class RefreshMapBuildState extends ChangeNotifier {
     if (initMapBuildState.initMapTripleBuildCycle) {
       throw StateError(
           'Tried to call refreshMapBuildCycle.startFirstBuild() when initMapTripleBuildCycle is true.');
+    } else if (!allowRefreshMapDoubleBuildCycle) {
+      throw StateError(
+          'Tried to call refreshMapBuildCycle.startFirstBuild() when allowRefreshMapDoubleBuildCycle is false.');
     } else {
       refreshMapDoubleBuildCycle = true;
+      Injector.updatePlacesBuild(context).allowUpdatePlacesDoubleBuildCycle =
+          false; // disallow updatePlacesDoubleBuildCycle while refreshMapDoubleBuildCycle is in progress
 
       if (inFirstBuild) {
         throw StateError(
@@ -57,10 +62,12 @@ class RefreshMapBuildState extends ChangeNotifier {
     }
   }
 
-  void endSecondBuild() {
+  void endSecondBuild(BuildContext context) {
     refreshMapDoubleBuildCycle = false;
     inSecondBuild = false;
     allowRefreshMapDoubleBuildCycle = true;
+    Injector.updatePlacesBuild(context).allowUpdatePlacesDoubleBuildCycle =
+        true;
     logger.w('==========REFRESH MAP DOUBLE BUILD END==========');
   }
 }

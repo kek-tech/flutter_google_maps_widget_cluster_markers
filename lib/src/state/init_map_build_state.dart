@@ -89,11 +89,16 @@ class InitMapBuildState extends ChangeNotifier {
     }
   }
 
-  void endThirdBuild() {
+  void endThirdBuild(BuildContext context) {
     initMapTripleBuildCycle = false;
     inThirdBuild = false;
     allowInitMapTripleBuildCycle = false;
     logger.w('==========INIT MAP TRIPLE BUILD END==========');
+
+    Injector.refreshMapBuild(context).allowRefreshMapDoubleBuildCycle = true;
+    Injector.updatePlacesBuild(context).allowUpdatePlacesDoubleBuildCycle =
+        true;
+
     if (afterInitMapCallback != null) {
       logger.w('Invoking afterInitMapCallback');
       afterInitMapCallback!.call();

@@ -70,8 +70,7 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
       } else if (initMapBuildState.inThirdBuild) {
         logger.v(
             '''initMapTripleBuildCycle: inThirdBuild: end of thirdBuild and initMapTripleBuildCycle''');
-        initMapBuildState.endThirdBuild();
-        refreshMapBuildState.allowRefreshMapDoubleBuildCycle = true;
+        initMapBuildState.endThirdBuild(context);
       } else {
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
@@ -87,7 +86,7 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
       } else if (refreshMapBuildState.inSecondBuild) {
         logger.v(
             '''refreshMapBuildState: inSecondBuild: end of secondBuild and refreshMapDoubleBuildCycle''');
-        refreshMapBuildState.endSecondBuild();
+        refreshMapBuildState.endSecondBuild(context);
       } else {
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
@@ -101,11 +100,10 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
             .v('''updatePlacesDoubleBuildCycle: inFirstBuild: end of firstBuild
         ''');
         updatePlacesBuildState.startSecondBuild(context);
-        refreshMapBuildState.allowRefreshMapDoubleBuildCycle = true;
       } else if (updatePlacesBuildState.inSecondBuild) {
         logger.v(
             '''updatePlacesDoubleBuildCycle: inSecondBuild: end of secondBuild and updatePlacesDoubleBuildCycle''');
-        updatePlacesBuildState.endSecondBuild();
+        updatePlacesBuildState.endSecondBuild(context);
       } else {
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
