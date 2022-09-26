@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_widget_cluster_markers.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,6 +11,17 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
   /// Context to use for package so that methods which depend on the package's
   /// subtree context can be called from anywhere when the package is used.
   BuildContext? _context;
+
+  //! Set Places
+  void Function(List<Place> newPlaces)? _setPlaces;
+
+  void setPlaces(List<Place> newPlaces) {
+    if (_setPlaces == null) {
+      throw StateError(
+          'Tried to call setItems without passing a controller to GoogleMapWidgetClusterMarkers');
+    }
+    _setPlaces!.call(newPlaces);
+  }
 
   //! Refresh Map
   void Function(BuildContext context)? _refreshMap;
@@ -41,10 +53,18 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
     await _zoomToMarker!.call(position: position, cluster: cluster);
   }
 
+  //! Init
+  /// Initialises controller; automatically called within package, do not need
+  /// to call manually unless trying to reinitialise .
   void init(BuildContext context, MapState mapState,
       RefreshMapBuildState refreshMapBuildState) {
     _context = context;
     _zoomToMarker = mapState.zoomToMarker;
     _refreshMap = refreshMapBuildState.startFirstBuild;
+    if (!mapState.clusterManagerInitialised) {
+      throw StateError(
+          'Tried to initialise controller before initialising clusterManager');
+    }
+    _setPlaces = mapState.clusterManager!.setItems;
   }
 }

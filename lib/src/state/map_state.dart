@@ -256,6 +256,7 @@ class MapState extends ChangeNotifier {
 
   /// Do not access this directly, only to be used as setter.
   ClusterManager? _clusterManager;
+  ClusterManager? get clusterManager => _clusterManager;
 
   // change this back to getter
   void _assertClusterManagerInitialised() {
@@ -275,7 +276,8 @@ class MapState extends ChangeNotifier {
     _clusterManager = ClusterManager<Place>(
       places, updateMarkers,
       markerBuilder: markerBuilder,
-      stopClusteringZoom: 13.0, //  zoom level above which clustering stops
+      // stopClusteringZoom: 13.0, //  zoom level above which clustering stops
+      stopClusteringZoom: 0, //  zoom level above which clustering stops
     );
   }
 
