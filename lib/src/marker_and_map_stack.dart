@@ -43,11 +43,6 @@ class MarkerAndMapStack extends StatelessWidget {
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
 
-    if (controller != null) {
-      // Init controller if not null
-      controller!.init(context, mapState, refreshMapBuildState);
-    }
-
     if (initMapBuildState.allowInitMapTripleBuildCycle) {
       initMapBuildState.startFirstBuild();
     }
@@ -141,6 +136,7 @@ class MarkerAndMapStack extends StatelessWidget {
                   places: places,
                   placeMarkerOnTap: placeMarkerOnTap,
                   clusterMarkerOnTap: clusterMarkerOnTap,
+                  controller: controller,
                 ),
               );
             } else {

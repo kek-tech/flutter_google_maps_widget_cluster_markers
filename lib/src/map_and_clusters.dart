@@ -1,8 +1,8 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_widget_cluster_markers.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
-import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/cluster_manager_id_utils.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
@@ -15,12 +15,14 @@ class MapAndClusters extends StatefulWidget {
     required this.places,
     required this.placeMarkerOnTap,
     required this.clusterMarkerOnTap,
+    required this.controller,
     super.key,
   });
 
   final List<Place> places;
   final Future<void> Function(String latLngId)? placeMarkerOnTap;
   final Future<void> Function(String latLngId)? clusterMarkerOnTap;
+  final GoogleMapWidgetClusterMarkersController? controller;
 
   @override
   State<MapAndClusters> createState() => _MapAndClustersState();
@@ -206,6 +208,11 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
         updateMarkers: _updateMarkersCallback,
         markerBuilder: _markerBuilderCallback,
       );
+    }
+
+    if (widget.controller != null) {
+      // Init controller if not null
+      widget.controller!.init(context, mapState, refreshMapBuildState);
     }
 
     return GoogleMap(
