@@ -76,7 +76,7 @@ packages:
     description:
       path: "."
       ref: dev
-      resolved-ref: "95e006c876374ea53231c2b02e97c9ae26a002b7"
+      resolved-ref: "0473dd0d1947ff87e4043492741b827b743fe82f"
       url: "https://github.com/Kek-Tech/flutter_google_maps_widget_cluster_markers.git"
     source: git
     version: "0.0.1"

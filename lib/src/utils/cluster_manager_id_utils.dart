@@ -8,4 +8,10 @@ abstract class ClusterManagerIdUtils {
       return true;
     }
   }
+
+  /// Takes lat_lng_clusterSize and returns lat_lng
+  static String clusterManagerIdToLatLngId(String clusterManagerId) {
+    final temp = clusterManagerId.split('_');
+    return '${temp[0]}_${temp[1]}';
+  }
 }

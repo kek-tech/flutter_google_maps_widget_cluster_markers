@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Center(
           child: GoogleMapWidgetClusterMarkers(
+        showLogs: false,
         key: GlobalKey(),
         debugMode: true,
         clusterMarkerTextStyle: const TextStyle(
