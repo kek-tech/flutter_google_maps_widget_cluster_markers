@@ -4,6 +4,7 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_bu
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/utils/cluster_manager_id_utils.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
@@ -12,12 +13,15 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class MapAndClusters extends StatefulWidget {
   const MapAndClusters({
     required this.places,
-    // required this.markerBuilder,
+    required this.placeMarkerOnTap,
+    required this.clusterMarkerOnTap,
     super.key,
   });
 
   final List<Place> places;
-  // final Future<Marker> Function(Cluster<Place>)? markerBuilder;
+  final Future<void> Function(String latLngId)? placeMarkerOnTap;
+  final Future<void> Function(String latLngId)? clusterMarkerOnTap;
+
   @override
   State<MapAndClusters> createState() => _MapAndClustersState();
 }
@@ -102,19 +106,27 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
         InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
         RefreshMapBuildState refreshMapBuildState =
             Injector.refreshMapBuild(context);
+        String clusterManagerId = cluster.getId();
+        String latLngId =
+            ClusterManagerIdUtils.clusterManagerIdToLatLngId(clusterManagerId);
         return Marker(
-          markerId: MarkerId(cluster.getId()),
+          markerId: MarkerId(clusterManagerId),
           position: cluster.location,
           //! Marker onTap
           onTap: () async {
-            logger.v('Marker: onTap: $cluster');
+            logger.v('Marker: onTap: ${cluster.getId()}');
 
             // zoom in to marker
-            cluster.isMultiple
+            await (cluster.isMultiple
                 ? mapState.zoomToMarker(
                     position: cluster.location, cluster: true)
                 : mapState.zoomToMarker(
-                    position: cluster.location, cluster: false);
+                    position: cluster.location, cluster: false));
+
+            // call onTaps
+            await (cluster.isMultiple
+                ? widget.clusterMarkerOnTap?.call(latLngId)
+                : widget.placeMarkerOnTap?.call(latLngId));
           },
           //! Marker Icon/Bitmap
           icon: (() {

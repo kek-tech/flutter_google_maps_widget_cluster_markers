@@ -13,10 +13,10 @@ import 'package:provider/provider.dart';
 class MarkerAndMapStack extends StatelessWidget {
   const MarkerAndMapStack({
     required this.places,
-    // required this.markerBuilder,
     required this.defaultPlaceMarker,
     required this.defaultClusterMarker,
-    //
+    required this.placeMarkerOnTap,
+    required this.clusterMarkerOnTap,
     required this.clusterMarker,
     required this.placeMarkerBuilder,
     super.key,
@@ -28,6 +28,9 @@ class MarkerAndMapStack extends StatelessWidget {
 
   final Widget clusterMarker;
   final Widget Function(String latLngId) placeMarkerBuilder;
+
+  final Future<void> Function(String latLngId)? placeMarkerOnTap;
+  final Future<void> Function(String latLngId)? clusterMarkerOnTap;
 
   @override
   Widget build(BuildContext context) {
@@ -126,8 +129,9 @@ class MarkerAndMapStack extends StatelessWidget {
                     ? const EdgeInsets.only(left: 100)
                     : EdgeInsets.zero,
                 child: MapAndClusters(
-                  // markerBuilder: markerBuilder,
                   places: places,
+                  placeMarkerOnTap: placeMarkerOnTap,
+                  clusterMarkerOnTap: clusterMarkerOnTap,
                 ),
               );
             } else {

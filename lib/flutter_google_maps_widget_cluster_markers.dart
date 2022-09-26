@@ -92,6 +92,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
     required this.defaultClusterMarker,
     required this.clusterMarker,
     required this.placeMarkerBuilder,
+    this.clusterMarkerOnTap,
+    this.placeMarkerOnTap,
     this.showLogs = false,
     this.clusterMarkerTextStyle,
     this.clusterTextPadding = EdgeInsets.zero,
@@ -105,9 +107,11 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
     super.key,
   });
   final List<Place> places;
-  // final Future<Marker> Function(Cluster<Place>)? markerBuilder;
   final Widget defaultPlaceMarker;
   final Widget defaultClusterMarker;
+
+  final Future<void> Function(String latLngId)? placeMarkerOnTap;
+  final Future<void> Function(String latLngId)? clusterMarkerOnTap;
 
   final Widget clusterMarker;
   final Widget Function(String latLngId) placeMarkerBuilder;
@@ -155,11 +159,12 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
       ],
       child: MarkerAndMapStack(
         places: places,
-        // markerBuilder: markerBuilder,
         defaultPlaceMarker: defaultPlaceMarker,
         defaultClusterMarker: defaultClusterMarker,
         clusterMarker: clusterMarker,
         placeMarkerBuilder: placeMarkerBuilder,
+        placeMarkerOnTap: placeMarkerOnTap,
+        clusterMarkerOnTap: clusterMarkerOnTap,
       ),
     );
   }
