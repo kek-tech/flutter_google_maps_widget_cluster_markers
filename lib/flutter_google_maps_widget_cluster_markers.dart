@@ -94,6 +94,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
     required this.placeMarkerBuilder,
     this.showLogs = false,
     this.clusterMarkerTextStyle,
+    this.clusterTextPadding = EdgeInsets.zero,
     this.debugMode = false,
     this.devicePixelRatio = 1,
     this.initialCameraPosition = const CameraPosition(
@@ -118,6 +119,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
   final DebugBuildStage debugBuildStage;
 
   final TextStyle? clusterMarkerTextStyle;
+  final EdgeInsets clusterTextPadding;
+
   final bool showLogs;
 
   @override
@@ -143,6 +146,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
             initialCameraPosition: initialCameraPosition,
             debugBuildStage: debugBuildStage,
             clusterMarkerTextStyle: clusterMarkerTextStyle,
+            clusterTextPadding: clusterTextPadding,
           ),
         ),
         ChangeNotifierProvider(create: (context) => InitMapBuildState()),

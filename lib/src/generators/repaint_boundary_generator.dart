@@ -19,7 +19,6 @@ class RepaintBoundaryGenerator extends StatefulWidget {
 
   final Widget clusterMarker;
   final Widget Function(String latLngId) placeMarkerBuilder;
-
   @override
   State<RepaintBoundaryGenerator> createState() =>
       _RepaintBoundaryGeneratorState();
@@ -42,9 +41,13 @@ class _RepaintBoundaryGeneratorState extends State<RepaintBoundaryGenerator>
               alignment: Alignment.center,
               children: [
                 widget.clusterMarker,
-                Text(
-                  '${element.clusterSize}',
-                  style: mapState.clusterMarkerTextStyle,
+                Padding(
+                  padding: mapState.clusterTextPadding,
+                  child: Text(
+                    '${element.clusterSize}',
+                    textAlign: TextAlign.center,
+                    style: mapState.clusterMarkerTextStyle,
+                  ),
                 ),
               ],
             )),
