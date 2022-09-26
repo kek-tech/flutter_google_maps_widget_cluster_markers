@@ -12,8 +12,8 @@ class InitMapBuildState extends ChangeNotifier {
   ///
   final Future<void> Function()? afterInitMapCallback;
   //! Build Members
-  /// Double build cycle flag used when the Google Map is created for the first time
-  ///
+  /// Build cycle flag used when the Google Map is created for the first time
+  ///0
   /// Is false after the first double build cycle to prevent user from reinitialising
   bool allowInitMapTripleBuildCycle = true;
 
@@ -47,7 +47,7 @@ class InitMapBuildState extends ChangeNotifier {
     }
   }
 
-  Future<void> startSecondBuild(BuildContext context) async {
+  void startSecondBuild(BuildContext context) {
     logger.w('==========startSecondBuild==========');
     if (!initMapTripleBuildCycle) {
       throw StateError(

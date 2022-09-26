@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 
@@ -91,6 +92,9 @@ class _RepaintBoundaryGeneratorState extends State<RepaintBoundaryGenerator>
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+    UpdatePlacesBuildState updatePlacesBuildState =
+        Injector.updatePlacesBuild(context);
+
     if (initMapBuildState.initMapTripleBuildCycle) {
       if (initMapBuildState.inFirstBuild) {
         throw StateError(
@@ -121,6 +125,21 @@ class _RepaintBoundaryGeneratorState extends State<RepaintBoundaryGenerator>
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
             \nrefreshMapDoubleBuildCycle: true
+            \ninFirstBuild: false
+            \ninSecondBuild: false''');
+      }
+    } else if (updatePlacesBuildState.updatePlacesDoubleBuildCycle) {
+      if (updatePlacesBuildState.inFirstBuild) {
+        throw StateError(
+            'RepaintBoundaryGenerator called in initMapBuildState.inFirstBuild, where ClusterManager is not initialised yet');
+      } else if (updatePlacesBuildState.inSecondBuild) {
+        logger.v('''updatePlacesDoubleBuildCycle: inSecondBuild:''');
+        await mapState.convertCachedRepaintBoundariesToBitmaps();
+        mapState.callMarkerBuilderAndUpdateMarkersCallback();
+      } else {
+        throw UnimplementedError(
+            '''Unimplemented Case: _updateMarkersCallback called when
+            \nupdatePlacesDoubleBuildCycle: true
             \ninFirstBuild: false
             \ninSecondBuild: false''');
       }

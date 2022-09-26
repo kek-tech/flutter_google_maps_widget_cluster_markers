@@ -6,6 +6,7 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/map_and_clusters.
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +43,8 @@ class MarkerAndMapStack extends StatelessWidget {
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+    UpdatePlacesBuildState updatePlacesBuildState =
+        Injector.updatePlacesBuild(context);
 
     if (initMapBuildState.allowInitMapTripleBuildCycle) {
       initMapBuildState.startFirstBuild();
@@ -83,7 +86,7 @@ class MarkerAndMapStack extends StatelessWidget {
                   return const SizedBox();
                 } else if (initMapBuildState.inSecondBuild) {
                   throw StateError(
-                      'RepaintBoundaryGenerator: refreshMapDoubleBuildCycle: rebuildRepaintBoundaryGenerator was called in inSecondBuild');
+                      'RepaintBoundaryGenerator: initMapTripleBuildCycle: rebuildRepaintBoundaryGenerator was called in inSecondBuild');
                 } else if (initMapBuildState.inThirdBuild) {
                   logger.v(
                       'RepaintBoundaryGenerator: initMapTripleBuildCycle: inThirdBuild, generating RepaintBoundaries');
@@ -110,11 +113,28 @@ class MarkerAndMapStack extends StatelessWidget {
                   );
                 } else {
                   throw StateError(
-                      'RepaintBoundaryGenerator: initMapTripleBuildCycle: inFirstBuild and inSecondBuild are both false');
+                      'RepaintBoundaryGenerator: refreshMapDoubleBuildCycle: inFirstBuild and inSecondBuild are both false');
+                }
+              } else if (updatePlacesBuildState.updatePlacesDoubleBuildCycle) {
+                if (updatePlacesBuildState.inFirstBuild) {
+                  throw StateError(
+                      'RepaintBoundaryGenerator: updatePlacesDoubleBuildCycle: rebuildRepaintBoundaryGenerator was called in inFirstBuild');
+                } else if (updatePlacesBuildState.inSecondBuild) {
+                  logger.v(
+                      'RepaintBoundaryGenerator: updatePlacesDoubleBuildCycle: inSecondBuild, generating RepaintBoundaries');
+                  return RepaintBoundaryGenerator(
+                    key:
+                        GlobalKey(), // need to provide key so that widget is replaced and afterFirstLayout is called again
+                    clusterMarker: clusterMarker,
+                    placeMarkerBuilder: placeMarkerBuilder,
+                  );
+                } else {
+                  throw StateError(
+                      'RepaintBoundaryGenerator: updatePlacesDoubleBuildCycle: inFirstBuild and inSecondBuild are both false');
                 }
               } else {
                 throw StateError(
-                    'RepaintBoundaryGenerator: initMapTripleBuildCycle and refreshMapDoubleBuildCycle are both false');
+                    'RepaintBoundaryGenerator: initMapTripleBuildCycle, refreshMapDoubleBuildCycle and updatePlacesDoubleBuildCycle are all false');
               }
             },
           ),

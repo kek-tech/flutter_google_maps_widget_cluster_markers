@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_widget_cluster_markers.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Controller for flutter_google_maps_widget_cluster_markers package which is
@@ -13,14 +14,15 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
   BuildContext? _context;
 
   //! Set Places
-  void Function(List<Place> newPlaces)? _setPlaces;
 
-  void setPlaces(List<Place> newPlaces) {
-    if (_setPlaces == null) {
+  void Function(BuildContext context, List<Place> newPlaces)? _updatePlaces;
+
+  void updatePlaces(List<Place> newPlaces) {
+    if (_updatePlaces == null || _context == null) {
       throw StateError(
           'Tried to call setItems without passing a controller to GoogleMapWidgetClusterMarkers');
     }
-    _setPlaces!.call(newPlaces);
+    _updatePlaces!.call(_context!, newPlaces);
   }
 
   //! Refresh Map
@@ -30,7 +32,7 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
   ///
   ///
   void refreshMap() {
-    if (_refreshMap == null && _context == null) {
+    if (_refreshMap == null || _context == null) {
       throw StateError(
           'Tried to call refreshMap without passing a controller to GoogleMapWidgetClusterMarkers');
     }
@@ -56,8 +58,11 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
   //! Init
   /// Initialises controller; automatically called within package, do not need
   /// to call manually unless trying to reinitialise .
-  void init(BuildContext context, MapState mapState,
-      RefreshMapBuildState refreshMapBuildState) {
+  void init(
+      BuildContext context,
+      MapState mapState,
+      RefreshMapBuildState refreshMapBuildState,
+      UpdatePlacesBuildState updatePlacesBuildState) {
     _context = context;
     _zoomToMarker = mapState.zoomToMarker;
     _refreshMap = refreshMapBuildState.startFirstBuild;
@@ -65,6 +70,6 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
       throw StateError(
           'Tried to initialise controller before initialising clusterManager');
     }
-    _setPlaces = mapState.clusterManager!.setItems;
+    _updatePlaces = updatePlacesBuildState.startFirstBuild;
   }
 }

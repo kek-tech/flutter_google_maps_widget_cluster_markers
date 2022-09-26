@@ -4,6 +4,7 @@ import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_w
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/cluster_manager_id_utils.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
@@ -47,6 +48,8 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+    UpdatePlacesBuildState updatePlacesBuildState =
+        Injector.updatePlacesBuild(context);
 
     setState(() {
       /// Update this StatefulWidget.markers = _clusterManager.markers
@@ -64,11 +67,11 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
         logger.v('''initMapTripleBuildCycle: inSecondBuild: end of secondBuild
         ''');
         initMapBuildState.startThirdBuild(context);
-        refreshMapBuildState.allowRefreshMapDoubleBuildCycle = true;
       } else if (initMapBuildState.inThirdBuild) {
         logger.v(
             '''initMapTripleBuildCycle: inThirdBuild: end of thirdBuild and initMapTripleBuildCycle''');
         initMapBuildState.endThirdBuild();
+        refreshMapBuildState.allowRefreshMapDoubleBuildCycle = true;
       } else {
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
@@ -92,6 +95,24 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
             \ninFirstBuild: false
             \ninSecondBuild: false''');
       }
+    } else if (updatePlacesBuildState.updatePlacesDoubleBuildCycle) {
+      if (updatePlacesBuildState.inFirstBuild) {
+        logger
+            .v('''updatePlacesDoubleBuildCycle: inFirstBuild: end of firstBuild
+        ''');
+        updatePlacesBuildState.startSecondBuild(context);
+        refreshMapBuildState.allowRefreshMapDoubleBuildCycle = true;
+      } else if (updatePlacesBuildState.inSecondBuild) {
+        logger.v(
+            '''updatePlacesDoubleBuildCycle: inSecondBuild: end of secondBuild and updatePlacesDoubleBuildCycle''');
+        updatePlacesBuildState.endSecondBuild();
+      } else {
+        throw UnimplementedError(
+            '''Unimplemented Case: _updateMarkersCallback called when
+            \nupdatePlacesDoubleBuildCycle: true
+            \ninFirstBuild: false
+            \ninSecondBuild: false''');
+      }
     } else {
       throw UnimplementedError(
           '''Unimplemented Case: _updateMarkersCallback called with
@@ -108,6 +129,8 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
         InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
         RefreshMapBuildState refreshMapBuildState =
             Injector.refreshMapBuild(context);
+        UpdatePlacesBuildState updatePlacesBuildState =
+            Injector.updatePlacesBuild(context);
         String clusterManagerId = cluster.getId();
         String latLngId =
             ClusterManagerIdUtils.clusterManagerIdToLatLngId(clusterManagerId);
@@ -184,6 +207,26 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
                 \ninFirstBuild: false
                 \ninSecondBuild: false''');
               }
+            } else if (updatePlacesBuildState.updatePlacesDoubleBuildCycle) {
+              if (updatePlacesBuildState.inFirstBuild) {
+                logger.v(
+                    '''updatePlacesDoubleBuildCycle: inFirstBuild: Clusters just updated in ClusterManager, using defaultMarkerBitmaps.''');
+                if (cluster.isMultiple) {
+                  return mapState.defaultClusterMarkerBitmap!;
+                } else {
+                  return mapState.defaultPlaceMarkerBitmap!;
+                }
+              } else if (updatePlacesBuildState.inSecondBuild) {
+                logger.v('''updatePlacesDoubleBuildCycle: inSecondBuild: ''');
+                return mapState.getBitmapFromClusterManagerId(
+                    context, cluster.getId());
+              } else {
+                throw UnimplementedError(
+                    '''Unimplemented Case: _markerBuilderCallback called when
+                \nupdatePlacesDoubleBuildCycle: true
+                \ninFirstBuild: false
+                // \ninSecondBuild: false''');
+              }
             } else {
               throw UnimplementedError(
                   '''Unimplemented Case: _markerBuilderCallback called with
@@ -201,6 +244,8 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+    UpdatePlacesBuildState updatePlacesBuildState =
+        Injector.updatePlacesBuild(context);
 
     if (!mapState.clusterManagerInitialised) {
       mapState.initClusterManager(
@@ -212,7 +257,8 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
 
     if (widget.controller != null) {
       // Init controller if not null
-      widget.controller!.init(context, mapState, refreshMapBuildState);
+      widget.controller!.init(
+          context, mapState, refreshMapBuildState, updatePlacesBuildState);
     }
 
     return GoogleMap(

@@ -281,7 +281,7 @@ class MapState extends ChangeNotifier {
     );
   }
 
-  /// Function to rebuilds the markers, does not start the entire double build cycle.
+  /// Function to rebuild the markers, does not start the entire double build cycle.
   ///
   /// Calls clusterManager.updateMap()
   /// Named as such to avoid confusion with [startRefreshMapDoubleBuildCycle]
@@ -296,5 +296,18 @@ class MapState extends ChangeNotifier {
     logger.i('rebuildMarkers');
     _assertClusterManagerInitialised();
     _clusterManager!.updateMap();
+  }
+
+  /// Function to rebuild the markers with new places, does not start the
+  /// entire build cycle.
+  ///
+  /// Calls clusterManager.setItems(), which in turn calls clusterManager.updateMap()
+  ///
+  /// Should only be called by updatePlacesDoubleBuildCycle, at start.
+  void callMarkerBuilderAndUpdateMarkersCallbackWithNewPlaces(
+      List<Place> newPlaces) {
+    logger.i('rebuildMarkers with new places');
+    _assertClusterManagerInitialised();
+    _clusterManager!.setItems(newPlaces);
   }
 }

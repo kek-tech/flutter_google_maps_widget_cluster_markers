@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
 import 'package:provider/provider.dart';
 
 ///  State Injector
@@ -13,4 +14,6 @@ class Injector {
       Provider.of<InitMapBuildState>(context, listen: false);
   static RefreshMapBuildState refreshMapBuild(BuildContext context) =>
       Provider.of<RefreshMapBuildState>(context, listen: false);
+  static UpdatePlacesBuildState updatePlacesBuild(BuildContext context) =>
+      Provider.of<UpdatePlacesBuildState>(context, listen: false);
 }

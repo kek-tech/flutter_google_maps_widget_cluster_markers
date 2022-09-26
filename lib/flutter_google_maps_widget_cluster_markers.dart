@@ -9,6 +9,7 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.d
 import 'package:flutter_google_maps_widget_cluster_markers/src/marker_and_map_stack.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
@@ -51,7 +52,8 @@ import 'package:provider/provider.dart';
 /// 9. ClusterManager.updateMap is then called, and markerBuilderCallback uses
 /// the newly generated bitmaps
 ///
-/// There are two types of build cycles,
+/// There are three types of build cycles,
+///
 /// - An initMapTripleBuildCycle, which occurs the first time GoogleMap is built
 /// FIRST BUILD
 /// 1. DefaultRepaintBoundaryGenerator builds
@@ -61,10 +63,10 @@ import 'package:provider/provider.dart';
 /// no clusters in view (because map has not rendered)
 /// 5. GoogleMap renders and calls onCameraIdle
 /// SECOND BUILD
-/// 5. MapState.refreshMarkerBuilderAndUpdateMarkerCallback() to get clusters in view
+/// 6. MapState.refreshMarkerBuilderAndUpdateMarkerCallback() to get clusters in view
 /// and use DefaultBitmaps
 /// THIRD BUILD
-/// 6. MapState.updateCachedPlacesAndClusters() splits clusterManager.clusters
+/// 7. MapState.updateCachedPlacesAndClusters() splits clusterManager.clusters
 /// into a List<CachedCluster> and List<CachedPlace> in state (so that there is
 /// a cached reference when updateMap is called).
 /// CachedCluster and CachedPlace contain a repaintBoundaryKey and
@@ -72,18 +74,58 @@ import 'package:provider/provider.dart';
 /// Additionally, CachedCluster contains clusterSize to display on the Marker,
 /// and CachedPlace contains the latLngId so that API requests can be made to
 /// furnish the Marker with information (e.g., occupancy).
-/// 7. ClusterBoundaryGenerator and PlaceBoundaryGenerator then builds a
+/// 8. ClusterBoundaryGenerator and PlaceBoundaryGenerator then builds a
 /// RepaintBoundary for each CachedCluster and CachedPlace, using both the
 /// repaintBoundaryKey and other info (clusterSize, latLngId)
-/// 8. MapState.storeBitmapsInCache() then converts each CachedPlace and
+/// 9. MapState.storeBitmapsInCache() then converts each CachedPlace and
 /// CachedCluster repaintBoundaryKey into a bitmap and stores it
-/// 9. ClusterManager.updateMap is then called, and markerBuilderCallback uses
+/// 10. ClusterManager.updateMap is then called, and markerBuilderCallback uses
 /// the newly generated bitmaps
 ///
 /// - A refreshMapDoubleBuildCycle, which occurs whenever the GoogleMap is refreshed
 /// FIRST BUILD
-///
+/// 1. MapState.refreshMarkerBuilderAndUpdateMarkerCallback() to get clusters in view
+/// and use DefaultBitmaps
 /// SECOND BUILD
+/// 2. MapState.updateCachedPlacesAndClusters() splits clusterManager.clusters
+/// into a List<CachedCluster> and List<CachedPlace> in state (so that there is
+/// a cached reference when updateMap is called).
+/// CachedCluster and CachedPlace contain a repaintBoundaryKey and
+/// clusterManagerId (so that markerBuilder knows which one to use).
+/// Additionally, CachedCluster contains clusterSize to display on the Marker,
+/// and CachedPlace contains the latLngId so that API requests can be made to
+/// furnish the Marker with information (e.g., occupancy).
+/// 3. ClusterBoundaryGenerator and PlaceBoundaryGenerator then builds a
+/// RepaintBoundary for each CachedCluster and CachedPlace, using both the
+/// repaintBoundaryKey and other info (clusterSize, latLngId)
+/// 4. MapState.storeBitmapsInCache() then converts each CachedPlace and
+/// CachedCluster repaintBoundaryKey into a bitmap and stores it
+/// 5. ClusterManager.updateMap is then called, and markerBuilderCallback uses
+/// the newly generated bitmaps
+///
+/// - An updatePlacesDoubleBuildCycle, which occurs occurs whenever the places in
+/// clusterManager is updated. This cycle uses the second and third build of
+/// initMapTripleBuildCycle
+/// FIRST
+/// 1. MapState.refreshMarkerBuilderAndUpdateMarkerCallback() to get clusters in view
+/// and use DefaultBitmaps
+/// THIRD BUILD
+/// 2. MapState.updateCachedPlacesAndClusters() splits clusterManager.clusters
+/// into a List<CachedCluster> and List<CachedPlace> in state (so that there is
+/// a cached reference when updateMap is called).
+/// CachedCluster and CachedPlace contain a repaintBoundaryKey and
+/// clusterManagerId (so that markerBuilder knows which one to use).
+/// Additionally, CachedCluster contains clusterSize to display on the Marker,
+/// and CachedPlace contains the latLngId so that API requests can be made to
+/// furnish the Marker with information (e.g., occupancy).
+/// 3. ClusterBoundaryGenerator and PlaceBoundaryGenerator then builds a
+/// RepaintBoundary for each CachedCluster and CachedPlace, using both the
+/// repaintBoundaryKey and other info (clusterSize, latLngId)
+/// 4. MapState.storeBitmapsInCache() then converts each CachedPlace and
+/// CachedCluster repaintBoundaryKey into a bitmap and stores it
+/// 5. ClusterManager.updateMap is then called, and markerBuilderCallback uses
+/// the newly generated bitmaps
+/// SECOND
 ///
 /// Note:
 /// * clusterManagerId == ClusterManager.cluster.getId(), has format lat_lng_clusterSize
@@ -168,7 +210,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
                   afterInitMapCallback: afterInitMapCallback,
                 )),
         ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
-        ChangeNotifierProvider(create: (context) => RefreshMapBuildState()),
+        ChangeNotifierProvider(create: (context) => UpdatePlacesBuildState()),
         if (controller != null)
           ChangeNotifierProvider(create: (context) => controller),
       ],
