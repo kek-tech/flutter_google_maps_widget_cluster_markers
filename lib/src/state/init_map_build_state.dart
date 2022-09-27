@@ -4,9 +4,16 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.da
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 
 class InitMapBuildState extends ChangeNotifier {
-  //! Build Members
-  /// Double build cycle flag used when the Google Map is created for the first time
+  InitMapBuildState({
+    required this.afterInitMapCallback,
+  });
+  //! Callback
+  /// Callback which is invoked after the initMapTripleBuildCycle is completed
   ///
+  final Future<void> Function()? afterInitMapCallback;
+  //! Build Members
+  /// Build cycle flag used when the Google Map is created for the first time
+  ///0
   /// Is false after the first double build cycle to prevent user from reinitialising
   bool allowInitMapTripleBuildCycle = true;
 
@@ -40,7 +47,7 @@ class InitMapBuildState extends ChangeNotifier {
     }
   }
 
-  Future<void> startSecondBuild(BuildContext context) async {
+  void startSecondBuild(BuildContext context) {
     logger.w('==========startSecondBuild==========');
     if (!initMapTripleBuildCycle) {
       throw StateError(
@@ -82,10 +89,19 @@ class InitMapBuildState extends ChangeNotifier {
     }
   }
 
-  void endThirdBuild() {
+  void endThirdBuild(BuildContext context) {
     initMapTripleBuildCycle = false;
     inThirdBuild = false;
     allowInitMapTripleBuildCycle = false;
     logger.w('==========INIT MAP TRIPLE BUILD END==========');
+
+    Injector.refreshMapBuild(context).allowRefreshMapDoubleBuildCycle = true;
+    Injector.updatePlacesBuild(context).allowUpdatePlacesDoubleBuildCycle =
+        true;
+
+    if (afterInitMapCallback != null) {
+      logger.w('Invoking afterInitMapCallback');
+      afterInitMapCallback!.call();
+    }
   }
 }

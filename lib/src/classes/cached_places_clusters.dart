@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/utils/cluster_manager_id_utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// CachedCluster does not have a latLngId because the Cluster latLng changes
@@ -28,7 +29,8 @@ class CachedPlace {
       {required String clusterManagerId,
       required GlobalKey repaintBoundaryKey}) {
     return CachedPlace._(
-        latLngId: clusterManagerIdToLatLngId(clusterManagerId),
+        latLngId:
+            ClusterManagerIdUtils.clusterManagerIdToLatLngId(clusterManagerId),
         clusterManagerId: clusterManagerId,
         repaintBoundaryKey: repaintBoundaryKey);
   }
@@ -43,10 +45,4 @@ class CachedPlace {
   final String clusterManagerId;
   final GlobalKey repaintBoundaryKey;
   BitmapDescriptor? bitmap;
-}
-
-/// Takes lat_lng_clusterSize and returns lat_lng
-String clusterManagerIdToLatLngId(String clusterManagerId) {
-  final temp = clusterManagerId.split('_');
-  return '${temp[1]}_${temp[1]}';
 }

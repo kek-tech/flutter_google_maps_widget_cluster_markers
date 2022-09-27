@@ -1,9 +1,11 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_widget_cluster_markers.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/init_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
-import 'package:flutter_google_maps_widget_cluster_markers/src/classes/place.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
+import 'package:flutter_google_maps_widget_cluster_markers/src/utils/cluster_manager_id_utils.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/injector.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
@@ -12,12 +14,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class MapAndClusters extends StatefulWidget {
   const MapAndClusters({
     required this.places,
-    // required this.markerBuilder,
+    required this.placeMarkerOnTap,
+    required this.clusterMarkerOnTap,
+    required this.controller,
     super.key,
   });
 
   final List<Place> places;
-  // final Future<Marker> Function(Cluster<Place>)? markerBuilder;
+  final Future<void> Function(String latLngId)? placeMarkerOnTap;
+  final Future<void> Function(String latLngId)? clusterMarkerOnTap;
+  final GoogleMapWidgetClusterMarkersController? controller;
+
   @override
   State<MapAndClusters> createState() => _MapAndClustersState();
 }
@@ -41,6 +48,8 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+    UpdatePlacesBuildState updatePlacesBuildState =
+        Injector.updatePlacesBuild(context);
 
     setState(() {
       /// Update this StatefulWidget.markers = _clusterManager.markers
@@ -58,11 +67,10 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
         logger.v('''initMapTripleBuildCycle: inSecondBuild: end of secondBuild
         ''');
         initMapBuildState.startThirdBuild(context);
-        refreshMapBuildState.allowRefreshMapDoubleBuildCycle = true;
       } else if (initMapBuildState.inThirdBuild) {
         logger.v(
             '''initMapTripleBuildCycle: inThirdBuild: end of thirdBuild and initMapTripleBuildCycle''');
-        initMapBuildState.endThirdBuild();
+        initMapBuildState.endThirdBuild(context);
       } else {
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
@@ -78,11 +86,28 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
       } else if (refreshMapBuildState.inSecondBuild) {
         logger.v(
             '''refreshMapBuildState: inSecondBuild: end of secondBuild and refreshMapDoubleBuildCycle''');
-        refreshMapBuildState.endSecondBuild();
+        refreshMapBuildState.endSecondBuild(context);
       } else {
         throw UnimplementedError(
             '''Unimplemented Case: _updateMarkersCallback called when
             \nrefreshMapDoubleBuildCycle: true
+            \ninFirstBuild: false
+            \ninSecondBuild: false''');
+      }
+    } else if (updatePlacesBuildState.updatePlacesDoubleBuildCycle) {
+      if (updatePlacesBuildState.inFirstBuild) {
+        logger
+            .v('''updatePlacesDoubleBuildCycle: inFirstBuild: end of firstBuild
+        ''');
+        updatePlacesBuildState.startSecondBuild(context);
+      } else if (updatePlacesBuildState.inSecondBuild) {
+        logger.v(
+            '''updatePlacesDoubleBuildCycle: inSecondBuild: end of secondBuild and updatePlacesDoubleBuildCycle''');
+        updatePlacesBuildState.endSecondBuild(context);
+      } else {
+        throw UnimplementedError(
+            '''Unimplemented Case: _updateMarkersCallback called when
+            \nupdatePlacesDoubleBuildCycle: true
             \ninFirstBuild: false
             \ninSecondBuild: false''');
       }
@@ -102,19 +127,29 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
         InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
         RefreshMapBuildState refreshMapBuildState =
             Injector.refreshMapBuild(context);
+        UpdatePlacesBuildState updatePlacesBuildState =
+            Injector.updatePlacesBuild(context);
+        String clusterManagerId = cluster.getId();
+        String latLngId =
+            ClusterManagerIdUtils.clusterManagerIdToLatLngId(clusterManagerId);
         return Marker(
-          markerId: MarkerId(cluster.getId()),
+          markerId: MarkerId(clusterManagerId),
           position: cluster.location,
           //! Marker onTap
           onTap: () async {
-            logger.v('Marker: onTap: $cluster');
+            logger.v('Marker: onTap: ${cluster.getId()}');
 
             // zoom in to marker
-            cluster.isMultiple
+            await (cluster.isMultiple
                 ? mapState.zoomToMarker(
                     position: cluster.location, cluster: true)
                 : mapState.zoomToMarker(
-                    position: cluster.location, cluster: false);
+                    position: cluster.location, cluster: false));
+
+            // call onTaps
+            await (cluster.isMultiple
+                ? widget.clusterMarkerOnTap?.call(latLngId)
+                : widget.placeMarkerOnTap?.call(latLngId));
           },
           //! Marker Icon/Bitmap
           icon: (() {
@@ -170,6 +205,26 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
                 \ninFirstBuild: false
                 \ninSecondBuild: false''');
               }
+            } else if (updatePlacesBuildState.updatePlacesDoubleBuildCycle) {
+              if (updatePlacesBuildState.inFirstBuild) {
+                logger.v(
+                    '''updatePlacesDoubleBuildCycle: inFirstBuild: Clusters just updated in ClusterManager, using defaultMarkerBitmaps.''');
+                if (cluster.isMultiple) {
+                  return mapState.defaultClusterMarkerBitmap!;
+                } else {
+                  return mapState.defaultPlaceMarkerBitmap!;
+                }
+              } else if (updatePlacesBuildState.inSecondBuild) {
+                logger.v('''updatePlacesDoubleBuildCycle: inSecondBuild: ''');
+                return mapState.getBitmapFromClusterManagerId(
+                    context, cluster.getId());
+              } else {
+                throw UnimplementedError(
+                    '''Unimplemented Case: _markerBuilderCallback called when
+                \nupdatePlacesDoubleBuildCycle: true
+                \ninFirstBuild: false
+                // \ninSecondBuild: false''');
+              }
             } else {
               throw UnimplementedError(
                   '''Unimplemented Case: _markerBuilderCallback called with
@@ -187,6 +242,8 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
     InitMapBuildState initMapBuildState = Injector.initMapBuild(context);
     RefreshMapBuildState refreshMapBuildState =
         Injector.refreshMapBuild(context);
+    UpdatePlacesBuildState updatePlacesBuildState =
+        Injector.updatePlacesBuild(context);
 
     if (!mapState.clusterManagerInitialised) {
       mapState.initClusterManager(
@@ -196,11 +253,21 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
       );
     }
 
+    if (widget.controller != null) {
+      // Init controller if not null
+      widget.controller!.init(
+          context, mapState, refreshMapBuildState, updatePlacesBuildState);
+    }
+
     return GoogleMap(
       markers: markers,
       initialCameraPosition: mapState.initialCameraPosition,
       onMapCreated: (GoogleMapController controller) {
         mapState.onMapCreated(controller);
+        if (widget.controller != null) {
+          // Set googleMapController in controller if not null
+          widget.controller!.googleMapController = controller;
+        }
       },
       onCameraMove:
           mapState.onCameraMove, // does not update render, only zoom value

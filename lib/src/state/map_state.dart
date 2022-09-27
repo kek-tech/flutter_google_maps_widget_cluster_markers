@@ -10,25 +10,19 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-enum DebugBuildStage {
-  // sequential build stages
-  initMapFirstBuild,
-  initMapSecondBuild,
-  refreshMapFirstBuild,
-  refreshMapSecondBuild,
-}
-
 class MapState extends ChangeNotifier {
   MapState({
     required this.debugMode,
     required this.devicePixelRatio,
     required this.initialCameraPosition,
-    required this.debugBuildStage,
+    required this.clusterMarkerTextStyle,
+    required this.clusterTextPadding,
   });
   //! Misc
   final bool debugMode;
-  final DebugBuildStage debugBuildStage;
   final double devicePixelRatio;
+  final TextStyle? clusterMarkerTextStyle;
+  final EdgeInsets clusterTextPadding;
 
   //! Default Markers
   /// Keys to use when generating and finding RepaintBoundary for default place marker
@@ -252,6 +246,7 @@ class MapState extends ChangeNotifier {
 
   /// Do not access this directly, only to be used as setter.
   ClusterManager? _clusterManager;
+  ClusterManager? get clusterManager => _clusterManager;
 
   // change this back to getter
   void _assertClusterManagerInitialised() {
@@ -271,11 +266,12 @@ class MapState extends ChangeNotifier {
     _clusterManager = ClusterManager<Place>(
       places, updateMarkers,
       markerBuilder: markerBuilder,
-      stopClusteringZoom: 13.0, //  zoom level above which clustering stops
+      // stopClusteringZoom: 13.0, //  zoom level above which clustering stops
+      stopClusteringZoom: 0, //  zoom level above which clustering stops
     );
   }
 
-  /// Function to rebuilds the markers, does not start the entire double build cycle.
+  /// Function to rebuild the markers, does not start the entire double build cycle.
   ///
   /// Calls clusterManager.updateMap()
   /// Named as such to avoid confusion with [startRefreshMapDoubleBuildCycle]
@@ -290,5 +286,18 @@ class MapState extends ChangeNotifier {
     logger.i('rebuildMarkers');
     _assertClusterManagerInitialised();
     _clusterManager!.updateMap();
+  }
+
+  /// Function to rebuild the markers with new places, does not start the
+  /// entire build cycle.
+  ///
+  /// Calls clusterManager.setItems(), which in turn calls clusterManager.updateMap()
+  ///
+  /// Should only be called by updatePlacesDoubleBuildCycle, at start.
+  void callMarkerBuilderAndUpdateMarkersCallbackWithNewPlaces(
+      List<Place> newPlaces) {
+    logger.i('rebuildMarkers with new places');
+    _assertClusterManagerInitialised();
+    _clusterManager!.setItems(newPlaces);
   }
 }
