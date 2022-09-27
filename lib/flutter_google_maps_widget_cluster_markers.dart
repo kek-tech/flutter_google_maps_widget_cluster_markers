@@ -27,32 +27,12 @@ import 'package:provider/provider.dart';
 /// 5. Calling setState on the Set<Marker> with the converted Bitmaps
 ///
 /// This package takes the approach a step further, allowing different
-/// Markers to be shown depending on whether it is a Cluster or a Place (Cluster of size 1),
-/// and also allows the Marker to wait for information from external APIs.
+/// Markers to be shown depending on whether it is a Cluster or a Place (Cluster of size 1).
+/// Different markers can also be shown depending on its location (allows the
+/// marker to wait for information from external APIs).
 ///
-/// A double build cycle is used to implement this, wherein the first build cycle
-/// allows the ClusterManager to perform its initial process, and the second
-/// build cycle builds Markers based on the Clusters from the first build cycle,
-/// converts them into bitmaps, then updates the map markers
 ///
-/// The second build cycle goes through the following process:
-/// 6. MapState.updateCachedPlacesAndClusters() splits clusterManager.clusters
-/// into a List<CachedCluster> and List<CachedPlace> in state (so that there is
-/// a cached reference when updateMap is called).
-/// CachedCluster and CachedPlace contain a repaintBoundaryKey and
-/// clusterManagerId (so that markerBuilder knows which one to use).
-/// Additionally, CachedCluster contains clusterSize to display on the Marker,
-/// and CachedPlace contains the latLngId so that API requests can be made to
-/// furnish the Marker with information (e.g., occupancy).
-/// 7. ClusterBoundaryGenerator and PlaceBoundaryGenerator then builds a
-/// RepaintBoundary for each CachedCluster and CachedPlace, using both the
-/// repaintBoundaryKey and other info (clusterSize, latLngId)
-/// 8. MapState.storeBitmapsInCache() then converts each CachedPlace and
-/// CachedCluster repaintBoundaryKey into a bitmap and stores it
-/// 9. ClusterManager.updateMap is then called, and markerBuilderCallback uses
-/// the newly generated bitmaps
-///
-/// There are three types of build cycles,
+/// There are three types of build cycles, used to implement this
 ///
 /// - An initMapTripleBuildCycle, which occurs the first time GoogleMap is built
 /// FIRST BUILD
@@ -106,10 +86,10 @@ import 'package:provider/provider.dart';
 /// - An updatePlacesDoubleBuildCycle, which occurs occurs whenever the places in
 /// clusterManager is updated. This cycle uses the second and third build of
 /// initMapTripleBuildCycle
-/// FIRST
+/// FIRST BUILD
 /// 1. MapState.refreshMarkerBuilderAndUpdateMarkerCallback() to get clusters in view
 /// and use DefaultBitmaps
-/// THIRD BUILD
+/// SECOND BUILD
 /// 2. MapState.updateCachedPlacesAndClusters() splits clusterManager.clusters
 /// into a List<CachedCluster> and List<CachedPlace> in state (so that there is
 /// a cached reference when updateMap is called).
@@ -125,7 +105,7 @@ import 'package:provider/provider.dart';
 /// CachedCluster repaintBoundaryKey into a bitmap and stores it
 /// 5. ClusterManager.updateMap is then called, and markerBuilderCallback uses
 /// the newly generated bitmaps
-/// SECOND
+///
 ///
 /// Note:
 /// * clusterManagerId == ClusterManager.cluster.getId(), has format lat_lng_clusterSize
@@ -149,35 +129,68 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
       target: LatLng(51.5136, -0.1365), // SOHO
       zoom: 14,
     ),
-    this.debugBuildStage = DebugBuildStage.refreshMapSecondBuild,
     this.controller,
     this.afterInitMapCallback,
     super.key,
   });
+
+  /// List of all places which will be used to generate clusters/place markers on the Google Map.
+  ///
+  /// Only places which are in view are rendered.
   final List<Place> places;
+
+  /// Widget used to display as default place marker.
+  ///
+  /// Default markers are used in different build stages, depending on the type of build cycle.
+  /// See package documentation for more info.
   final Widget defaultPlaceMarker;
+
+  /// Widget used to display as default cluster marker.
+  ///
+  /// Default markers are used in different build stages, depending on the type of build cycle.
+  /// See package documentation for more info.
   final Widget defaultClusterMarker;
 
+  /// Callback to invoke when a place marker is tapped.
   final Future<void> Function(String latLngId)? placeMarkerOnTap;
+
+  /// Callback to invoke when a cluster marker is tapped.
   final Future<void> Function(String latLngId)? clusterMarkerOnTap;
 
+  /// Widget used to display as cluster marker bitmap.
   final Widget clusterMarker;
+
+  /// Widget builder used to display as place marker bitmap.
   final Widget Function(String latLngId) placeMarkerBuilder;
 
+  /// If set to true, shows the widgets which are used to generate the markers in a panel on the side.
   final bool debugMode;
+
+  /// Controls the size of the bitmap generated from each widget.
   final double devicePixelRatio;
 
+  /// Controls the initial camera position on the Google Map
   final CameraPosition initialCameraPosition;
-  final DebugBuildStage debugBuildStage;
 
+  /// Sets the TextStyle for the number shown in cluster markers.
   final TextStyle? clusterMarkerTextStyle;
+
+  /// Padding to position the cluster number within the cluster marker.
+  ///
+  /// Can be used to vertically center the number due to baseline Center alignment issues.
   final EdgeInsets clusterTextPadding;
 
   /// Set to true to see all logs, false to just show error logs
   final bool showLogs;
 
+  /// Top level controller which can be used to expose the GoogleMapWidgetClusterMarkers API.
+  ///
+  /// E.g., refreshMap(), GoogleMapController.
   final GoogleMapWidgetClusterMarkersController? controller;
 
+  /// Callback invoked when the initMapTripleBuildCycle finishes.
+  ///
+  /// Null by default.
   final Future<void> Function()? afterInitMapCallback;
 
   @override
@@ -201,7 +214,6 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
             debugMode: debugMode,
             devicePixelRatio: devicePixelRatio,
             initialCameraPosition: initialCameraPosition,
-            debugBuildStage: debugBuildStage,
             clusterMarkerTextStyle: clusterMarkerTextStyle,
             clusterTextPadding: clusterTextPadding,
           ),

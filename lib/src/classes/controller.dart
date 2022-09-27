@@ -21,6 +21,7 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
     _googleMapController = _;
   }
 
+  /// Exposes GoogleMapController used in GoogleMapWidgetClusterMarkers
   GoogleMapController get googleMapController {
     if (_googleMapController == null) {
       throw StateError(
@@ -36,6 +37,10 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
 
   void Function(BuildContext context, List<Place> newPlaces)? _updatePlaces;
 
+  /// Updates list of all places which will be used to generate clusters/place markers on the Google Map,
+  /// and triggers the updatePlacesDoubleBuildCycle.\
+  ///
+  /// Can only be called after initMapTripleBuildCycle and cannot be run concurrently with refreshMapDoubleBuildCycle.
   void updatePlaces(List<Place> newPlaces) {
     if (_updatePlaces == null || _context == null) {
       throw StateError(
@@ -47,9 +52,9 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
   //! Refresh Map
   void Function(BuildContext context)? _refreshMap;
 
-  /// Refreshes the map using the refreshMapDoubleBuildCycle.
+  /// Refreshes the map and markers using the refreshMapDoubleBuildCycle.
   ///
-  ///
+  /// Can only be called after initMapTripleBuildCycle and cannot be run concurrently with updatePlacesDoubleBuildCycle.
   void refreshMap() {
     if (_refreshMap == null || _context == null) {
       throw StateError(
@@ -64,7 +69,6 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
 
   /// Zooms to the marker indicated by [position].
   /// If [cluster] is true, the CameraPosition is centered on the provided [position].
-
   Future<void> zoomToMarker(
       {required LatLng position, required bool cluster}) async {
     if (_zoomToMarker == null) {
@@ -76,7 +80,7 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
 
   //! Init
   /// Initialises controller; automatically called within package, do not need
-  /// to call manually unless trying to reinitialise .
+  /// to call manually unless trying to reinitialise.
   void init(
       BuildContext context,
       MapState mapState,

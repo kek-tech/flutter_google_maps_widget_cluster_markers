@@ -10,26 +10,16 @@ import 'package:flutter_google_maps_widget_cluster_markers/src/utils/logger.dart
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-enum DebugBuildStage {
-  // sequential build stages
-  initMapFirstBuild,
-  initMapSecondBuild,
-  refreshMapFirstBuild,
-  refreshMapSecondBuild,
-}
-
 class MapState extends ChangeNotifier {
   MapState({
     required this.debugMode,
     required this.devicePixelRatio,
     required this.initialCameraPosition,
-    required this.debugBuildStage,
     required this.clusterMarkerTextStyle,
     required this.clusterTextPadding,
   });
   //! Misc
   final bool debugMode;
-  final DebugBuildStage debugBuildStage;
   final double devicePixelRatio;
   final TextStyle? clusterMarkerTextStyle;
   final EdgeInsets clusterTextPadding;
