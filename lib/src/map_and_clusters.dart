@@ -264,6 +264,10 @@ class _MapAndClustersState extends State<MapAndClusters> with AfterLayoutMixin {
       initialCameraPosition: mapState.initialCameraPosition,
       onMapCreated: (GoogleMapController controller) {
         mapState.onMapCreated(controller);
+        if (widget.controller != null) {
+          // Set googleMapController in controller if not null
+          widget.controller!.googleMapController = controller;
+        }
       },
       onCameraMove:
           mapState.onCameraMove, // does not update render, only zoom value

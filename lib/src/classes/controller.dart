@@ -3,6 +3,7 @@ import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_w
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Controller for flutter_google_maps_widget_cluster_markers package which is
@@ -12,6 +13,24 @@ class GoogleMapWidgetClusterMarkersController extends ChangeNotifier {
   /// Context to use for package so that methods which depend on the package's
   /// subtree context can be called from anywhere when the package is used.
   BuildContext? _context;
+
+  //! Google Map Controller
+  GoogleMapController? _googleMapController;
+
+  set googleMapController(GoogleMapController _) {
+    _googleMapController = _;
+  }
+
+  GoogleMapController get googleMapController {
+    if (_googleMapController == null) {
+      throw StateError(
+          'Tried to access googleMapController when it has not been set');
+    }
+    return _googleMapController!;
+  }
+
+  //! Cluster Manager
+  /// Cluster Manager is not exposed publicly because it can mess up the build cycle.
 
   //! Set Places
 
