@@ -173,6 +173,7 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
   final TextStyle? clusterMarkerTextStyle;
   final EdgeInsets clusterTextPadding;
 
+  /// Set to true to see all logs, false to just show error logs
   final bool showLogs;
 
   final GoogleMapWidgetClusterMarkersController? controller;
@@ -188,9 +189,9 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
       },
       filter: TypeFilter(
         ignoreTypes: {},
-        ignoreLevel: Level.warning,
+        ignoreLevel: Level.error,
       ),
-      level: showLogs ? Level.verbose : Level.warning,
+      level: showLogs ? Level.verbose : Level.error,
     );
 
     return MultiProvider(
