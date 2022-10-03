@@ -1,3 +1,7 @@
+## 0.0.1+1
+
+* Fixed flutter_dev_utils function renaming
+
 ## 0.0.1
 
 * Fixed bugs, added features and documentation

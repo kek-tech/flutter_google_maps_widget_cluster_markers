@@ -20,7 +20,7 @@ import 'dart:ui' as ui;
 /// If need solution for debugMode: https://stackoverflow.com/questions/57645037/unable-to-take-screenshot-in-flutter
 Future<BitmapDescriptor> boundaryToBitmap(
     RenderRepaintBoundary boundary, double devicePixelRatio) async {
-  return await asyncTryCatchHandler(
+  return await asyncTryHandler(
     tryFunction: () async {
       logger.v('Converting RenderRepaintBoundary to Image');
       // boundary to image
@@ -53,7 +53,7 @@ Future<BitmapDescriptor> boundaryToBitmap(
 /// calling [boundaryToBitmap]
 Future<BitmapDescriptor> boundaryKeyToBitmap(
     GlobalKey boundaryKey, double devicePixelRatio) async {
-  return await asyncTryCatchHandler(
+  return await asyncTryHandler(
     tryFunction: () async {
       if (boundaryKey.currentContext == null) {
         final error =

@@ -45,7 +45,7 @@ class MapState extends ChangeNotifier {
   /// Should only be called once after first layout of default markers
   Future<void> initDefaultBitmaps(BuildContext context) async {
     logger.v('initDefaultBitmaps: running');
-    await asyncTryCatchHandler(
+    await asyncTryHandler(
       tryFunction: () async {
         final devicePixelRatio = Injector.map(context).devicePixelRatio;
         // convert to bitmap

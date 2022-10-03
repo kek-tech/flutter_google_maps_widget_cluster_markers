@@ -1,6 +1,6 @@
 name: flutter_google_maps_widget_cluster_markers
 description: Flutter package to enable clustering of location markers on Google Maps using widgets specific to each location..
-version: 0.0.1
+version: 0.0.1+1
 homepage: https://github.com/Kek-Tech/flutter_google_maps_widget_cluster_markers
 
 # publish_to: none
@@ -13,7 +13,7 @@ dependencies:
   collection: ^1.16.0
   flutter:
     sdk: flutter
-  flutter_dev_utils: ^0.0.0
+  flutter_dev_utils: ^0.0.1+2
   google_maps_cluster_manager: ^3.0.0+1
   google_maps_flutter: ^2.1.1
   logger: ^1.1.0

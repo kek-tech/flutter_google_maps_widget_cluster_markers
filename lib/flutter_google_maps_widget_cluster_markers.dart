@@ -198,8 +198,8 @@ class GoogleMapWidgetClusterMarkers extends StatelessWidget {
   Widget build(BuildContext context) {
     logger = CallerLogger(
       ignoreCallers: {
-        'syncTryCatchHandler',
-        'asyncTryCatchHandler',
+        'syncTryHandler',
+        'asyncTryHandler',
       },
       filter: TypeFilter(
         ignoreTypes: {},

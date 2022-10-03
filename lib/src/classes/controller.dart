@@ -3,7 +3,6 @@ import 'package:flutter_google_maps_widget_cluster_markers/flutter_google_maps_w
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/map_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/refresh_map_build_state.dart';
 import 'package:flutter_google_maps_widget_cluster_markers/src/state/update_places_build_state.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Controller for flutter_google_maps_widget_cluster_markers package which is
